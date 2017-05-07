@@ -1,0 +1,164 @@
+#!/usr/bin/env sh
+#
+# git-rename -- An interface to the workflow around renaming a branch
+#
+# To report bugs, request features, or contribute:
+# https://github.com/git-scripts/library
+#
+# Copyright 2017 @git-scripts
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is furnished
+# to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+
+bold=$(tput bold)
+reset=$(tput sgr0)
+
+usage() {
+    echo
+    echo "${bold}USAGE${reset}"
+    echo "        git rename [options] <name>"
+    echo
+    echo "${bold}OPTIONS${reset}"
+    echo "        -d, --dry-run"
+    echo "            Print debugging information and show what commands will be"
+    echo "            executed, without actually taking any actions."
+    echo
+    echo "        -u <remote>, --update-remote <remote>"
+    echo "            In addition to renaming the branch locally, using this option"
+    echo "            will perform the following actions to synchronize the specified"
+    echo "            remote:"
+    echo
+    echo "            1. Push the newly renamed local branch to the remote"
+    echo "            2. If pushing was successful, delete the old branch from the remote"
+    echo
+    echo "${bold}ARGUMENTS${reset}"
+    echo "        name"
+    echo "            The new name to change your current branch to."
+}
+
+
+# Display usage and exit if there aren't any arguments
+# or if one of the support 'help'commands/flags is passed
+# as the first argument.
+if  [ $# -lt 1 ] || \
+    [ "$1" == "-h" ] || \
+    [ "$1" == "--help" ] || \
+    [ "$1" == "help" ]; then
+    usage
+    exit 1
+fi
+
+
+# Exit if a `git` command doesn't exist in the user's PATH or
+# if we're not in a git repository. This is useful to keep
+# in case the script is ran directly, instead of through the git CLI.
+if  ! command -v git &> /dev/null ||
+    ! command git rev-parse --git-dir &> /dev/null;
+    then exit 1; fi
+
+
+# Get the branch name or short revision hash.
+branchName=$(git symbolic-ref -q --short HEAD || \
+             git rev-parse --short HEAD 2>&1)
+
+# Parse flags and options
+parse_error=0
+DRY_RUN=0
+UPDATE_REMOTE=0
+REMOTE_NAME=""
+for i in "$@"; do
+    case "$i" in
+        -u|--update-remote)
+            UPDATE_REMOTE=1
+            REMOTE_NAME="$2"
+            if [ -z "$REMOTE_NAME" ]; then
+                parse_error=1
+                echo "git-rename: Error: --update-remote requires a remote."
+            elif ! command git ls-remote "$REMOTE_NAME" &> /dev/null; then
+                parse_error=1
+                echo "git-rename: Error: Remote '$REMOTE_NAME' is invalid or you do not have the correct access rights."
+            fi
+            shift 2
+            ;;
+        -d|--dry-run)
+            DRY_RUN=1
+            shift
+            ;;
+        -*)
+            parse_error=1
+            echo "git-rename: Error: Unknown option '$1'"
+            shift
+            ;;
+    esac
+done
+
+
+# Get the new branch name
+# We are assuming the first non-option argument is the desired name
+targetName="$1"
+
+
+# Output variable information if dry run
+if [ $DRY_RUN -eq 1 ]; then
+    echo "git-rename: Dry-run: Info: UPDATE_REMOTE: $UPDATE_REMOTE"
+    echo "git-rename: Dry-run: Info: REMOTE_NAME: $REMOTE_NAME"
+    echo "git-rename: Dry-run: Info: DRY_RUN: $DRY_RUN"
+    echo "git-rename: Dry-run: Info: branchName: $branchName"
+    echo "git-rename: Dry-run: Info: targetName: $targetName"
+fi
+
+
+# Exit the script if there were errors parsing the arguments
+if [ $parse_error -eq 1 ]; then
+    echo
+    echo "It looks like there were some errors."
+    echo "Try \`git rename help\` to see the help."
+    exit
+fi
+
+
+# Set commands to variables for easy re-use if dry running
+cmd_RenameBranch="git branch -m $targetName"
+cmd_PushBranch="git push --set-upstream $REMOTE_NAME $targetName"
+cmd_DeleteOldBranch="git push --delete $REMOTE_NAME $branchName"
+
+
+# If dry run, print commands to stdout
+# Otherwise, execute the commands stored in variables
+if [ $DRY_RUN -eq 1 ]; then
+    echo "git-rename: Dry-run: Execute: $cmd_RenameBranch"
+
+    if [ $UPDATE_REMOTE -eq 1 ]; then
+        echo "git-rename: Dry-run: Execute: $cmd_PushBranch"
+
+        if [ "$targetName" != "$branchName" ]; then
+          echo "git-rename: Dry-run: Execute: $cmd_DeleteOldBranch"
+        fi
+    fi
+else
+    $cmd_RenameBranch
+
+    if [ $UPDATE_REMOTE -eq 1 ]; then
+        if command $cmd_PushBranch; then
+            if [ "$targetName" != "$branchName" ]; then
+                $cmd_DeleteOldBranch
+            fi
+        fi
+    fi
+fi
