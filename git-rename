@@ -87,12 +87,12 @@ for i in "$@"; do
         -u|--update-remote)
             UPDATE_REMOTE=1
             REMOTE_NAME="$2"
-            if [ -z "$REMOTE_NAME" ]; then
+            if [ -z $REMOTE_NAME ] || [ ${REMOTE_NAME%${REMOTE_NAME#?}} = '-' ]; then
                 parse_error=1
-                echo "git-rename: Error: --update-remote requires a remote."
+                echo "git-rename: Error: --update-remote requires the name of a remote as an argument."
             elif ! command git ls-remote "$REMOTE_NAME" > /dev/null 2>&1; then
                 parse_error=1
-                echo "git-rename: Error: Remote '$REMOTE_NAME' is invalid or you do not have the correct access rights."
+                echo "git-rename: Error: Remote '$REMOTE_NAME' is invalid, or you do not have the correct access rights."
             fi
             shift 2
             ;;
