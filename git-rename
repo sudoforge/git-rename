@@ -68,8 +68,8 @@ fi
 # Exit if a `git` command doesn't exist in the user's PATH or
 # if we're not in a git repository. This is useful to keep
 # in case the script is ran directly, instead of through the git CLI.
-if  ! command -v git &> /dev/null ||
-    ! command git rev-parse --git-dir &> /dev/null;
+if  ! command -v git > /dev/null 2>&1 ||
+    ! command git rev-parse --git-dir > /dev/null 2>&1;
     then exit 1; fi
 
 
@@ -90,7 +90,7 @@ for i in "$@"; do
             if [ -z "$REMOTE_NAME" ]; then
                 parse_error=1
                 echo "git-rename: Error: --update-remote requires a remote."
-            elif ! command git ls-remote "$REMOTE_NAME" &> /dev/null; then
+            elif ! command git ls-remote "$REMOTE_NAME" > /dev/null 2>&1; then
                 parse_error=1
                 echo "git-rename: Error: Remote '$REMOTE_NAME' is invalid or you do not have the correct access rights."
             fi
