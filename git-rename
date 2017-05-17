@@ -57,9 +57,9 @@ usage() {
 # or if one of the support 'help'commands/flags is passed
 # as the first argument.
 if  [ $# -lt 1 ] || \
-    [ "$1" == "-h" ] || \
-    [ "$1" == "--help" ] || \
-    [ "$1" == "help" ]; then
+    [ "$1" = "-h" ] || \
+    [ "$1" = "--help" ] || \
+    [ "$1" = "help" ]; then
     usage
     exit 1
 fi
@@ -87,7 +87,7 @@ for i in "$@"; do
         -u|--update-remote)
             UPDATE_REMOTE=1
             REMOTE_NAME="$2"
-            if [ -z $REMOTE_NAME ] || [ ${REMOTE_NAME%${REMOTE_NAME#?}} = '-' ]; then
+            if [ -z "$REMOTE_NAME" ] || [ "${REMOTE_NAME%${REMOTE_NAME#?}}" = '-' ]; then
                 parse_error=1
                 echo "git-rename: Error: --update-remote requires the name of a remote as an argument."
             elif ! command git ls-remote "$REMOTE_NAME" > /dev/null 2>&1; then
@@ -155,7 +155,7 @@ else
     $cmd_RenameBranch
 
     if [ $UPDATE_REMOTE -eq 1 ]; then
-        if command $cmd_PushBranch; then
+        if command "$cmd_PushBranch"; then
             if [ "$targetName" != "$branchName" ]; then
                 $cmd_DeleteOldBranch
             fi
