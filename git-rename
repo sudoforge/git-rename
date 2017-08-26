@@ -32,24 +32,24 @@ reset=$(tput sgr0)
 usage() {
     echo
     echo "${bold}USAGE${reset}"
-    echo "        git rename [options] <name>"
+    echo "    git rename [options] <name>"
     echo
     echo "${bold}OPTIONS${reset}"
-    echo "        -d, --dry-run"
-    echo "            Print debugging information and show what commands will be"
-    echo "            executed, without actually taking any actions."
+    echo "    -d, --dry-run"
+    echo "        Print debugging information and show what commands will be"
+    echo "        executed, without actually taking any actions."
     echo
-    echo "        -u <remote>, --update-remote <remote>"
-    echo "            In addition to renaming the branch locally, using this option"
-    echo "            will perform the following actions to synchronize the specified"
-    echo "            remote:"
+    echo "    -u <remote>, --update-remote <remote>"
+    echo "        In addition to renaming the branch locally, using this option"
+    echo "        will perform the following actions to synchronize the specified"
+    echo "        remote:"
     echo
-    echo "            1. Push the newly renamed local branch to the remote"
-    echo "            2. If pushing was successful, delete the old branch from the remote"
+    echo "        1. Push the newly renamed local branch to the remote"
+    echo "        2. If pushing was successful, delete the old branch from the remote"
     echo
     echo "${bold}ARGUMENTS${reset}"
-    echo "        name"
-    echo "            The new name to change your current branch to."
+    echo "    name"
+    echo "        The new name to change your current branch to."
 }
 
 
