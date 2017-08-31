@@ -183,7 +183,7 @@ else
     $cmd_RenameBranch
 
     if [ $UPDATE_REMOTE -eq 1 ]; then
-        if command "$cmd_PushBranch"; then
+        if command $cmd_PushBranch; then
             if [ "$TARGET_NAME" != "$CURRENT_REF_NAME" ]; then
                 $cmd_DeleteOldBranch
             fi
