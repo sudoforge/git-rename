@@ -5,7 +5,17 @@ related to renaming a branch - including on the remote.
 
 ## Installation
 
-Obtain the source by cloning [this repository][repo-uri] or by downloading a
+### Arch Linux
+
+* [git-rename][aurpkg]
+
+[aurpkg]: https://aur.archlinux.org/packages/git-rename
+
+
+### Build from source
+
+
+Obtain the source by cloning [this repository][repo-uri] or by downloading the
 tarball of a [release][repo-releases]. Then run `make install` from the source
 root.
 
