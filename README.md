@@ -3,6 +3,24 @@
 `git-rename`provides a nice interface to `git branch -m` and the workflow
 related to renaming a branch - including on the remote.
 
+## Installation
+
+Obtain the source by cloning [this repository][repo-uri] or by downloading a
+tarball of a [release][repo-releases]. Then run `make install` from the source
+root.
+
+```
+$ git clone https://github.com/sudoforge/git-rename.git
+$ cd git-rename
+$ git checkout $(git describe --tags $(git rev-list --tags --max-count=1))
+$ [sudo] make install
+```
+
+[repo-uri]: https://github.com/sudoforge/git-rename.git
+[repo-releases]: https://github.com/sudoforge/git-rename/releases
+
+## Usage
+
 ```text
 git rename [options] <name>
 
